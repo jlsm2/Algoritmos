@@ -4,7 +4,7 @@
 using namespace std;
 
 struct fileiras {
-    int cadeiraOcupadas;
+    int cadeirasOcupadas;
     fileiras* down;
     fileiras* head1;
 };
@@ -67,46 +67,91 @@ assentos* criarAssentos(int n) {
 }
 
 void cadastrar(fileiras* head1, assentos* head2, string name, int priority, int numCadastro) {
+    bool alocada = false;
     int i = 1;
-    while(head1 != nullptr) {
-        while(head2 != nullptr) {
-            if(head2->sentada) {
-                head2 = head2->next;
+    if (head2 == nullptr && head1 == nullptr) {
+        head2->value = name;
+        head2->priority = priority;
+        head2->fil = i;
+        head2->sentada = true;
+        head1->cadeirasOcupadas+=1;
+    }
+    else {
+        while(head1 != nullptr) {
+            while(head2 != nullptr) {
+                if(head2->sentada) {
+                    head2 = head2->next;
+                }
+                else {
+                    head2->value = name;
+                    head2->priority = priority;
+                    head2->fil = i;
+                    head2->sentada = true;
+                    head1->cadeirasOcupadas+=1;
+                    alocada = true;
+                    break;
+                }
             }
-            else {
-                head2->value = name;
-                head2->priority = priority;
-                head2->fil = i;
-                head2->sentada = true;
-                head1->cadeirasOcupadas+=1;
+            if(alocada) {
                 break;
             }
-        }
-        if(head2 != nullptr) {
-            break;
-        }
-        else {
-            i++;
+            else {
+                i++;
+            }
         }
     }
-    
-    if(head1 != nullptr && head2 != nullptr) {
+    if(alocada) {
         cout << name << " (" << numCadastro << ") " << "foi alocado(a) na fileira " << head2->fil << "\n";
     }
     else {
-        cout << name << " (" << numCadastro << ") " << " nao foi alocado(a) em nenhuma fileira" << "\n";
+        cout << name << " (" << numCadastro << ") " << "nao foi alocado(a) em nenhuma fileira" << "\n";
     }
 }
 
 void ver(fileiras* head1, assentos* head2, string name) {
-    int i = 1;
     bool achou = false;
     while(head1 != nullptr) {
         while(head2 != nullptr) {
             if(head2->value == name) {
-                 
+                cout << "Sentado(a) na fileira " << head2->fil << "\n";
+                achou = true;
+                break;
+            }
+            else {
+                head2 = head2->next;
             }
         }
+        if(achou) {
+            break;
+        }
+    }
+    if(!achou) {
+        cout << "Inexistente" << "\n";
+    }
+}
+
+void remover(fileiras* head1, assentos* head2, string name) {
+    bool removeu = false;
+    while(head1 != nullptr) {
+        while(head2 != nullptr) {
+            if(head2->value == name) {
+                cout << "Removido(a)" << "\n";
+                removeu = true;
+                head2->value = "";
+                head2->sentada = false;
+                head2->priority = 0;
+                break;
+            }
+            else {
+                head2 = head2->next;
+            }
+        }
+        if(removeu) {
+            break;
+        }
+    }
+    if(!removeu) {
+        cout << "Inexistente" << "\n";
     }
 }
 
@@ -114,6 +159,9 @@ int main() {
     int numFileiras, numAssentos, n, p, numCadastro = 1;
     string command, name;
     cin >> numFileiras >> numAssentos >> n;
+    
+    fileiras* head1 = nullptr;
+    assentos* head2 = nullptr;
     
     fileiras* totalFileiras = criarFileiras(numFileiras);
     assentos* totalAssentos = criarAssentos(numAssentos);
@@ -125,10 +173,10 @@ int main() {
             numCadastro+=1;
         }
         else if (command == "VER") {
-            
+            ver(head1, head2, name);
         }
         else if (command == "REM") {
-            
+            remover(head1, head2, name);
         }
     }
     
