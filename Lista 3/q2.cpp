@@ -1,74 +1,79 @@
 #include <iostream>
-#include <vector>
 #include <string>
 using namespace std;
 
-struct fileiras {
-    int cadeirasOcupadas;
-    fileiras* down;
-    fileiras* head1;
+struct ocupantes {
+    int prioridade, numRegistro;
+    string nome;
 };
 
 struct assentos {
-    int priority, fil;
-    string value;
-    bool sentada;
-    assentos* head2;
-    assentos* next;
+    int value;
+    ocupantes** heap;
 };
 
-assentos* criarAssento() {
-    assentos* newNode = new assentos;
-    newNode->value = "";
-    newNode->sentada = false;
-    newNode->priority = 0;
-    newNode->fil = 0;
-    newNode->next = nullptr;
+struct fila {
+    int value;
+    assentos** table;
+};
+
+ocupantes* criar(string nome; int prioridade; int numRegistro) {
+    ocupantes* newNode = new ocupantes;
+    newNode->nome = nome;
+    newNode->prioridade = prioridade;
+    newNode->numRegistro = numRegistro;
     return newNode;
 }
 
-fileiras* criarFileira() {
-    fileiras* newNode = new fileiras;
-    newNode->cadeirasOcupadas = 0;
-    newNode->down = nullptr;
-    return newNode;
-}
-
-fileiras* criarFileiras(int n) {
-    if (n <= 0) {
-        return nullptr;
-    }
-
-    fileiras* head1 = criarFileira();
-    fileiras* current = head1;
-
-    for (int i=2;i<=n;++i) {
-        current->down = criarFileira();
-        current = current->down;
+int hashFunction(fila* hashtable, int numFileira, int numAssentos) {
+    for(int i=0;i<numFileira;i++) {
+        for(int j=0;j<numAssentos;j++) {
+            if(hashtable->table[i]->heap[j] == nullptr) {
+                return i;
+            }
+        }
     }
     
-    return head1;
+    return -1;
 }
 
-assentos* criarAssentos(int n) {
-    if (n <= 0) {
-        return nullptr;
-    }
-
-    assentos* head2 = criarAssento();
-    assentos* current = head2;
-
-    for (int i=2;i<=n;++i) {
-        current->next = criarAssento();
-        current = current->next;
-    }
+void maxheapify(ocupantes* arr[], int n, int i) {
+    int largest = i;
+    int l = 2*i + 1;
+    int r = 2*i + 2;
     
-    return head2;
+    if(r < n && arr[r]->prioridade > arr[largest]->prioridade) {
+        largest = r;
+    }
+ 
+    if(l < n && arr[l]->prioridade > arr[largest]->prioridade) {
+        largest = l;
+    }
+
+    if(largest != i) {
+        swap(arr[i], arr[largest]);
+        maxheapify(arr, n, largest);
+    }
 }
+
+void insertmaxheap(assentos* assento, ocupantes* ocupante) {
+    assento->heap[assento->value] = ocupante;
+    ++assento->value;
+    buildmaxheap(assento->heap, assento->value);
+}
+
+void buildmaxheap(ocupantes* arr[], int n) {
+    if(n>=2) {
+        for(int i=(n/2) - 1; i>=0;i--) {
+            maxheapify(arr, n, i);
+        }
+    }
+}
+
+// não mudar ate aqui
+// mudar antes daqui ta tudo certo
 
 void cadastrar(fileiras* head1, assentos* head2, string name, int priority, int numCadastro) {
-    bool alocada = false;
-    int i = 1;
     if (head2 == nullptr && head1 == nullptr) {
         head2->value = name;
         head2->priority = priority;
