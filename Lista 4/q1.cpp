@@ -4,6 +4,7 @@ using namespace std;
 struct Adj {
     int data;
     Adj* next;
+    Adj* prev;
 };
 
 struct grafo {
@@ -13,13 +14,7 @@ struct grafo {
     Adj* lista;
 };
 
-struct listaGrafo {
-    int data;
-    listaGrafo* next;
-};
-
 grafo* head = nullptr;
-listaGrafo* head1 = nullptr;
 
 grafo* CriarVertices(grafo*& head, int vert) {
     grafo* newNode = new grafo;
@@ -48,10 +43,11 @@ void CriarAresta(grafo*& head, int v1, int v2) {
     if (temp == nullptr) {
         return;
     }
-
+    
     Adj* newAdj = new Adj;
     newAdj->data = v2;
     newAdj->next = nullptr;
+    newAdj->prev = nullptr;
 
     if (temp->lista == nullptr) {
         temp->lista = newAdj;
@@ -64,14 +60,45 @@ void CriarAresta(grafo*& head, int v1, int v2) {
     }
 
     cur->next = newAdj;
+    newAdj->prev = cur;
 }
 
-void PrintarListaAdj(Adj* cur) {
-    if (cur == nullptr) {
+void Visitar(grafo* head, int n) {
+    if (head == nullptr) {
         return;
     }
-    PrintarListaReverse(cur->next);
-    cout << cur->data << " ";
+    if(head->data == n) {
+        head->visitado = true;
+        return;
+    }
+    Visitar(head->next, n);
+}
+
+bool ChecarStatus(grafo* head, int n) {
+    if(head->data == n) {
+        if(head->visitado) {
+            return true;
+        }
+        return false;
+    }
+    ChecarStatus(head->next, n);
+}
+
+void PrintarListaAdj(Adj* tail) {
+    while (tail != nullptr) {
+        cout << tail->data << " ";
+        tail = tail->prev;
+    }
+}
+
+Adj* GetTail(Adj* lista) {
+    if (lista == nullptr)
+        return nullptr;
+
+    while (lista->next != nullptr) {
+        lista = lista->next;
+    }
+    return lista;
 }
 
 void PrintarTudo(grafo* head) {
@@ -83,39 +110,16 @@ void PrintarTudo(grafo* head) {
             cout << "Lista Vazia";
         }
         else {
-            PrintarListaAdj(cur);
+            Adj* tail = GetTail(cur);
+            PrintarListaAdj(tail);
         }
         cout << endl;
         temp = temp->next;
     }
 }
 
-void AddListaGrafo(listaGrafo*& head1, int n) {
-    listaGrafo* newNode = new listaGrafo;
-    newNode->data = n;
-    newNode->next = nullptr;
-
-    if (head1 == nullptr) {
-        head1 = newNode;
-        return;
-    }
-
-    listaGrafo* temp = head1;
-    while (temp->next != nullptr) {
-        temp = temp->next;
-    }
-
-    temp->next = newNode;
-}
-
-void PrintarListaGrafo(grafo* head, listaGrafo* head1) {
-    if(head1 == nullptr) {
-        AddListaGrafo(head1, 0);
-    }
+void PrintarListaGrafo(grafo* head) {
     
-    while(head1 != nullptr) {
-        
-    }
 }
 
 int main() {
@@ -131,8 +135,10 @@ int main() {
         CriarAresta(head, v2, v1);
         if(continuar == 0) {
             PrintarTudo(head);
-            cout << endl << endl;
-            
+            cout << endl;
+            if(head != nullptr) {
+                cout << 0;
+            }
             break;
         }
     }
