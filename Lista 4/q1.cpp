@@ -63,27 +63,6 @@ void CriarAresta(grafo*& head, int v1, int v2) {
     newAdj->prev = cur;
 }
 
-void Visitar(grafo* head, int n) {
-    if (head == nullptr) {
-        return;
-    }
-    if(head->data == n) {
-        head->visitado = true;
-        return;
-    }
-    Visitar(head->next, n);
-}
-
-bool ChecarStatus(grafo* head, int n) {
-    if(head->data == n) {
-        if(head->visitado) {
-            return true;
-        }
-        return false;
-    }
-    ChecarStatus(head->next, n);
-}
-
 void PrintarListaAdj(Adj* tail) {
     while (tail != nullptr) {
         cout << tail->data << " ";
@@ -118,8 +97,59 @@ void PrintarTudo(grafo* head) {
     }
 }
 
-void PrintarListaGrafo(grafo* head) {
-    
+void RemoverListasAdj(grafo* head, int n) {
+    grafo* temp = head;
+    while (temp != nullptr) {
+        Adj* cur = temp->lista;
+        Adj* prev = nullptr;
+        while (cur != nullptr) {
+            if (cur->data == n) {
+                if (prev == nullptr) {
+                    temp->lista = cur->next;
+                    if (cur->next != nullptr) {
+                        cur->next->prev = nullptr;
+                    }
+                    delete cur;
+                    cur = temp->lista;
+                } 
+                else {
+                    prev->next = cur->next;
+                    if (cur->next != nullptr) {
+                        cur->next->prev = prev;
+                    }
+                    delete cur;
+                    cur = prev->next;
+                }
+            } 
+            else {
+                prev = cur;
+                cur = cur->next;
+            }
+        }
+        temp = temp->next;
+    }
+}
+
+
+void PrintarListaGrafo(grafo* head, int vert) {
+    grafo* temp = head;
+    while(vert>=1) {
+        if(temp->lista != nullptr) {
+            Adj* tail = GetTail(temp->lista);
+            cout << tail->data << " ";
+            while(temp->data != tail->data) {
+                if(temp == nullptr) {
+                    temp = head;
+                }
+                temp = temp->next;
+            }
+            RemoverListasAdj(head, tail->data);
+            vert--;
+        }
+        else {
+            temp = head->next;
+        }
+    }
 }
 
 int main() {
@@ -137,7 +167,9 @@ int main() {
             PrintarTudo(head);
             cout << endl;
             if(head != nullptr) {
-                cout << 0;
+                cout << 0 << " ";
+                RemoverListasAdj(head, 0);
+                PrintarListaGrafo(head, v);
             }
             break;
         }
