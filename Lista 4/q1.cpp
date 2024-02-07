@@ -9,7 +9,6 @@ struct Adj {
 
 struct grafo {
     int data;
-    bool visitado;
     grafo* next;
     Adj* lista;
 };
@@ -20,7 +19,6 @@ grafo* CriarVertices(grafo*& head, int vert) {
     grafo* newNode = new grafo;
     newNode->data = vert;
     newNode->next = nullptr;
-    newNode->visitado = false;
     
     if(head == nullptr) {
         head = newNode;
@@ -130,27 +128,43 @@ void RemoverListasAdj(grafo* head, int n) {
     }
 }
 
-
-void PrintarListaGrafo(grafo* head, int vert) {
+bool ChecarListasAdj(grafo* head) {
     grafo* temp = head;
-    while(vert>=1) {
+    while (temp != nullptr) {
+        if (temp->lista != nullptr) {
+            return false;
+        }
+        temp = temp->next;
+    }
+    return true;
+}
+
+
+void PrintarListaGrafo(grafo* head) {
+    grafo* temp = head;
+    while(!ChecarListasAdj(head) && temp != nullptr) {
         if(temp->lista != nullptr) {
             Adj* tail = GetTail(temp->lista);
             cout << tail->data << " ";
             while(temp->data != tail->data) {
+                temp = temp->next;
                 if(temp == nullptr) {
                     temp = head;
                 }
-                temp = temp->next;
             }
             RemoverListasAdj(head, tail->data);
-            vert--;
         }
         else {
-            temp = head->next;
+            if(temp->next == nullptr) {
+                temp = head;
+            }
+            else {
+                temp = temp->next;
+            }
         }
     }
 }
+
 
 int main() {
     int v, v1, v2, continuar;
@@ -168,8 +182,10 @@ int main() {
             cout << endl;
             if(head != nullptr) {
                 cout << 0 << " ";
-                RemoverListasAdj(head, 0);
-                PrintarListaGrafo(head, v);
+                if(head->lista != nullptr) {
+                    RemoverListasAdj(head, 0);
+                    PrintarListaGrafo(head);
+                }
             }
             break;
         }
