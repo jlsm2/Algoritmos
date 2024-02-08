@@ -1,195 +1,109 @@
-#include<iostream>
+#include <iostream>
 using namespace std;
 
-struct Adj {
-    int data;
-    Adj* next;
-    Adj* prev;
+struct PilhaAdj {
+    int elementos[100];
+    int topo;
+
+    PilhaAdj() {
+        topo = -1;
+    }
+
+    bool isempty() {
+        if (topo == -1) {
+            return true;
+        }
+        return false;
+    }
+
+    void push(int valor) {
+        topo++;
+        elementos[topo] = valor;
+    }
+
+    int pop() {
+        if (!isempty()) {
+            int valor = elementos[topo];
+            topo--;
+            return valor;
+        }
+    }
 };
 
-struct grafo {
-    int data;
-    grafo* next;
-    Adj* lista;
+struct Grafo {
+    int vertices, arestas, matrizAdj[100][100]; 
+    PilhaAdj pilhas[100];
+
+    Grafo(int v) {
+        vertices = v;
+        arestas = 0;
+        for (int i = 0; i < vertices; ++i) {
+            for (int j = 0; j < vertices; ++j) {
+                matrizAdj[i][j] = 0;
+            }
+        }
+    }
+
+    void CriarAresta(int v1, int v2) {
+        matrizAdj[v1][v2] = 1;
+        matrizAdj[v2][v1] = 1;
+        pilhas[v1].push(v2);
+        pilhas[v2].push(v1);
+        arestas++;
+    }
+    
+    void PrintarListaAdj() {
+        for (int i = 0; i < vertices; ++i) {
+            cout << i << ": ";
+            if(pilhas[i].isempty()) {
+                cout << "Lista Vazia";
+            }
+            else {
+                while (!pilhas[i].isempty()) {
+                    cout << pilhas[i].pop() << " ";
+                }
+            }
+            cout << endl;
+        }
+    }
+    
+    void ApagarArestas(int v) {
+        for (int i = 0; i < vertices; ++i) {
+            for (int j = 0; j < vertices; ++j) {
+                if (j == v) {
+                    matrizAdj[i][j] = 0;
+                }
+            }
+        }
+    }
+    
+    void DFS(int v) {
+        for (int i = vertices - 1; i >= 0; --i) {
+            if(matrizAdj[v][i] == 1) {
+                cout << i << " ";
+                matrizAdj[v][i] = 0;
+                ApagarArestas(i);
+                DFS(i);
+            }
+        }
+    }
 };
-
-grafo* head = nullptr;
-
-grafo* CriarVertices(grafo*& head, int vert) {
-    grafo* newNode = new grafo;
-    newNode->data = vert;
-    newNode->next = nullptr;
-    
-    if(head == nullptr) {
-        head = newNode;
-    } 
-    else {
-        grafo* temp = head;
-        while(temp->next != nullptr) {
-            temp = temp->next;
-        }
-        temp->next = newNode;
-    }
-}
-
-void CriarAresta(grafo*& head, int v1, int v2) {
-    grafo* temp = head;
-    while (temp != nullptr && temp->data != v1) {
-        temp = temp->next;
-    }
-
-    if (temp == nullptr) {
-        return;
-    }
-    
-    Adj* newAdj = new Adj;
-    newAdj->data = v2;
-    newAdj->next = nullptr;
-    newAdj->prev = nullptr;
-
-    if (temp->lista == nullptr) {
-        temp->lista = newAdj;
-        return;
-    }
-
-    Adj* cur = temp->lista;
-    while (cur->next != nullptr) {
-        cur = cur->next;
-    }
-
-    cur->next = newAdj;
-    newAdj->prev = cur;
-}
-
-void PrintarListaAdj(Adj* tail) {
-    while (tail != nullptr) {
-        cout << tail->data << " ";
-        tail = tail->prev;
-    }
-}
-
-Adj* GetTail(Adj* lista) {
-    if (lista == nullptr)
-        return nullptr;
-
-    while (lista->next != nullptr) {
-        lista = lista->next;
-    }
-    return lista;
-}
-
-void PrintarTudo(grafo* head) {
-    grafo* temp = head;
-    while (temp != nullptr) {
-        cout << temp->data << ": ";
-        Adj* cur = temp->lista;
-        if(cur == nullptr) {
-            cout << "Lista Vazia";
-        }
-        else {
-            Adj* tail = GetTail(cur);
-            PrintarListaAdj(tail);
-        }
-        cout << endl;
-        temp = temp->next;
-    }
-}
-
-void RemoverListasAdj(grafo* head, int n) {
-    grafo* temp = head;
-    while (temp != nullptr) {
-        Adj* cur = temp->lista;
-        Adj* prev = nullptr;
-        while (cur != nullptr) {
-            if (cur->data == n) {
-                if (prev == nullptr) {
-                    temp->lista = cur->next;
-                    if (cur->next != nullptr) {
-                        cur->next->prev = nullptr;
-                    }
-                    delete cur;
-                    cur = temp->lista;
-                } 
-                else {
-                    prev->next = cur->next;
-                    if (cur->next != nullptr) {
-                        cur->next->prev = prev;
-                    }
-                    delete cur;
-                    cur = prev->next;
-                }
-            } 
-            else {
-                prev = cur;
-                cur = cur->next;
-            }
-        }
-        temp = temp->next;
-    }
-}
-
-bool ChecarListasAdj(grafo* head) {
-    grafo* temp = head;
-    while (temp != nullptr) {
-        if (temp->lista != nullptr) {
-            return false;
-        }
-        temp = temp->next;
-    }
-    return true;
-}
-
-
-void PrintarListaGrafo(grafo* head) {
-    grafo* temp = head;
-    while(!ChecarListasAdj(head) && temp != nullptr) {
-        if(temp->lista != nullptr) {
-            Adj* tail = GetTail(temp->lista);
-            cout << tail->data << " ";
-            while(temp->data != tail->data) {
-                temp = temp->next;
-                if(temp == nullptr) {
-                    temp = head;
-                }
-            }
-            RemoverListasAdj(head, tail->data);
-        }
-        else {
-            if(temp->next == nullptr) {
-                temp = head;
-            }
-            else {
-                temp = temp->next;
-            }
-        }
-    }
-}
-
 
 int main() {
     int v, v1, v2, continuar;
     cin >> v;
-    
-    for (int i=0;i<v;i++) {
-        CriarVertices(head, i);
-    }
+    Grafo grafo(v);
     
     while(cin >> v1 >> v2 >> continuar) {
-        CriarAresta(head, v1, v2);
-        CriarAresta(head, v2, v1);
+        grafo.CriarAresta(v1,v2);
         if(continuar == 0) {
-            PrintarTudo(head);
+            grafo.PrintarListaAdj();
             cout << endl;
-            if(head != nullptr) {
-                cout << 0 << " ";
-                if(head->lista != nullptr) {
-                    RemoverListasAdj(head, 0);
-                    PrintarListaGrafo(head);
-                }
-            }
-            break;
+            grafo.ApagarArestas(0);
+            cout << 0 << " ";
+            grafo.DFS(0);
         }
     }
-    
+
     return 0;
 }
