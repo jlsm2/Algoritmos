@@ -1,4 +1,4 @@
-# Links das questões do iudex
+# Links das questões do iudex (Algoritmos 2023.2)
 
 - Lista1
   - q1: https://iudex.io/problem/654ccbdfe0c9bd0001fd509f/statement
